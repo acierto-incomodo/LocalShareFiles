@@ -1,0 +1,1 @@
+pyinstaller --onefile --noconsole tu_script.py
