@@ -1,1 +1,1 @@
-pyinstaller --onefile --noconsole tu_script.py
+pyinstaller --onefile --noconsole LocalShareFiles.py

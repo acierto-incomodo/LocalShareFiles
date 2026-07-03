@@ -1,0 +1,6 @@
+Activar:
+python -m venv venv
+source venv/bin/activate
+
+Desactivar:
+deactivate
