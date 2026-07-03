@@ -5,9 +5,15 @@ import sys
 import json
 import webbrowser
 import threading
+import sys
 from pystray import Icon, Menu, MenuItem
 from PIL import Image, ImageDraw
 
+# Detectar si hay terminal
+if not sys.stdout.isatty():
+    print("This program must be run from a terminal.")
+    sys.exit(1)
+    
 # =========================
 # Detectar ruta base
 # =========================
