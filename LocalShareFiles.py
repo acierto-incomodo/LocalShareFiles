@@ -26,17 +26,26 @@ default_settings = {
     "show_console": True
 }
 
-# Crear settings.json si no existe
+# =========================
+# Crear settings y salir
+# =========================
 if not os.path.exists(settings_path):
     with open(settings_path, "w") as f:
         json.dump(default_settings, f, indent=4)
 
+    print("Se ha creado settings.json. Configúralo y vuelve a ejecutar.")
+    input("Pulsa ENTER para salir...")
+    sys.exit(0)
+
+# =========================
 # Cargar configuración
+# =========================
 try:
     with open(settings_path, "r") as f:
         settings = json.load(f)
 except:
-    settings = default_settings
+    print("Error leyendo settings.json")
+    sys.exit(1)
 
 PORT = int(settings.get("port", 8080))
 SHOW_CONSOLE = bool(settings.get("show_console", True))
@@ -44,7 +53,7 @@ SHOW_CONSOLE = bool(settings.get("show_console", True))
 os.chdir(base_path)
 
 # =========================
-# Handler sin spam si quieres
+# Handler
 # =========================
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -52,7 +61,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             super().log_message(format, *args)
 
 # =========================
-# Servidor en hilo
+# Servidor
 # =========================
 httpd = None
 
@@ -70,25 +79,34 @@ def start_server():
     except OSError:
         print(f"⚠️ Puerto {PORT} ocupado. Cambia el settings.json")
 
-def stop_server(icon=None, item=None):
+# =========================
+# Cerrar servidor correctamente
+# =========================
+def exit_app(icon, item):
     global httpd
     if httpd:
         httpd.shutdown()
-    if icon:
-        icon.stop()
-    os._exit(0)
+        httpd.server_close()
+    icon.stop()
+    sys.exit(0)
 
 # =========================
-# Crear icono simple
+# Abrir navegador
+# =========================
+def open_browser(icon, item):
+    webbrowser.open(f"http://localhost:{PORT}")
+
+# =========================
+# Icono simple
 # =========================
 def create_image():
-    img = Image.new('RGB', (64, 64), color=(30, 30, 30))
+    img = Image.new('RGB', (64, 64), (30, 30, 30))
     d = ImageDraw.Draw(img)
     d.rectangle((16, 16, 48, 48), fill=(0, 200, 255))
     return img
 
 # =========================
-# Tray icon
+# Tray
 # =========================
 def run_tray():
     icon = Icon(
@@ -96,14 +114,14 @@ def run_tray():
         create_image(),
         "LocalShareFiles",
         menu=Menu(
-            MenuItem("Abrir en navegador", lambda: webbrowser.open(f"http://localhost:{PORT}")),
-            MenuItem("Salir", stop_server)
+            MenuItem("Abrir en navegador", open_browser),
+            MenuItem("Salir", exit_app)
         )
     )
     icon.run()
 
 # =========================
-# Ejecutar todo
+# MAIN
 # =========================
 if __name__ == "__main__":
     server_thread = threading.Thread(target=start_server, daemon=True)
