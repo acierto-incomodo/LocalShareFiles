@@ -28,7 +28,7 @@ settings_path = os.path.join(base_path, "settings.json")
 # Config por defecto
 # =========================
 default_settings = {
-    "port": 8080,
+    "port": 4934,
     "show_console": True
 }
 
@@ -53,7 +53,7 @@ except:
     print("Error leyendo settings.json")
     sys.exit(1)
 
-PORT = int(settings.get("port", 8080))
+PORT = int(settings.get("port", 4934))
 SHOW_CONSOLE = bool(settings.get("show_console", True))
 
 os.chdir(base_path)
