@@ -1,11 +1,9 @@
-import http.server
-import socketserver
 import os
 import sys
 import json
 import webbrowser
 import threading
-import sys
+import subprocess
 from pystray import Icon, Menu, MenuItem
 from PIL import Image, ImageDraw
 
@@ -13,7 +11,7 @@ from PIL import Image, ImageDraw
 if not sys.stdout.isatty():
     print("This program must be run from a terminal.")
     sys.exit(1)
-    
+
 # =========================
 # Detectar ruta base
 # =========================
@@ -59,40 +57,36 @@ SHOW_CONSOLE = bool(settings.get("show_console", True))
 os.chdir(base_path)
 
 # =========================
-# Handler
+# PROCESO DEL SERVIDOR
 # =========================
-class CustomHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self, format, *args):
-        if SHOW_CONSOLE:
-            super().log_message(format, *args)
-
-# =========================
-# Servidor
-# =========================
-httpd = None
+http_process = None
 
 def start_server():
-    global httpd
+    global http_process
     try:
-        httpd = socketserver.TCPServer(("", PORT), CustomHandler)
+        http_process = subprocess.Popen(
+            ["python3", "-m", "http.server", str(PORT)],
+            cwd=base_path
+        )
 
         if SHOW_CONSOLE:
             print(f"Servidor en http://localhost:{PORT}")
 
         webbrowser.open(f"http://localhost:{PORT}")
-        httpd.serve_forever()
 
-    except OSError:
-        print(f"⚠️ Puerto {PORT} ocupado. Cambia el settings.json")
+    except Exception as e:
+        print("Error iniciando servidor:", e)
 
 # =========================
-# Cerrar servidor correctamente
+# Cerrar correctamente
 # =========================
 def exit_app(icon, item):
-    global httpd
-    if httpd:
-        httpd.shutdown()
-        httpd.server_close()
+    global http_process
+
+    if http_process:
+        http_process.terminate()
+        http_process.wait()
+
     icon.stop()
     sys.exit(0)
 
@@ -130,7 +124,5 @@ def run_tray():
 # MAIN
 # =========================
 if __name__ == "__main__":
-    server_thread = threading.Thread(target=start_server, daemon=True)
-    server_thread.start()
-
+    start_server()
     run_tray()
