@@ -1,1 +1,1 @@
-pyinstaller --onefile LocalShareFiles.py
+python PyInstaller --onefile LocalShareFiles.py
